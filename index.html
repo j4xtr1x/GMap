@@ -45,10 +45,19 @@
                     <button id="updateEdge">Update Connection</button>
                     <button id="removeEdge">Remove Connection</button>
                 </div>
+
+                <div class="menu-section">
+                    <h2>Project Management</h2>
+                    <button id="exportProjectBtn">Export Project</button>
+                    <label for="importProjectInput" class="import-button-label">Import Project</label>
+                    <input type="file" id="importProjectInput" accept=".json" style="display: none;">
+                </div>
             </div>
         </div>
         <button id="sidebarToggle" class="sidebar-toggle-button">></button>
     </div>
+
+    <div id="mode-indicator" class="indicator-hidden"></div>
 
     <datalist id="savedColors"></datalist>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>

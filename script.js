@@ -90,13 +90,13 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         groups: {
             Big: { // Largest
-                size: 25
+                size: 60
             },
             Medium: { // Intermediate
-                size: 18
+                size: 40
             },
             Small: { // Smallest
-                size: 12
+                size: 20
             }
         },
         interaction: {
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function () {
     removeNodeBtn.addEventListener('click', () => {
         const name = nodeNameInput.value.trim();
         if (name && nodes.get(name)) {
-            const message = `Tem certeza que deseja remover o nó "${name}"? Todas as conexões com este nó também serão removidas.`;
+            const message = `Are you sure you want to remove the node "${name}"? All connections to this node will also be removed.`;
             if (confirm(message)) {
                 // Find and remove all connected edges
                 const connectedEdges = edges.get({
@@ -464,8 +464,143 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    let isCtrlPressed = false;
+    let isAltPressed = false;
+    let selectedFromNode = null;
+    const modeIndicator = document.getElementById('mode-indicator');
+
+    function updateModeIndicator() {
+        if (isCtrlPressed && isAltPressed) {
+            modeIndicator.textContent = "Removal Mode Active";
+            modeIndicator.className = 'indicator-visible indicator-removal-mode';
+        } else if (isCtrlPressed) {
+            modeIndicator.textContent = "Connection Mode Active";
+            modeIndicator.className = 'indicator-visible indicator-creation-mode';
+        } else {
+            modeIndicator.className = 'indicator-hidden';
+        }
+    }
+
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Control') {
+            isCtrlPressed = true;
+        }
+        if (event.key === 'Alt') {
+            isAltPressed = true;
+            event.preventDefault(); // Prevent browser menu focus
+        }
+        updateModeIndicator();
+
+        // Ignore other keys if typing in an input.
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+        }
+    });
+
+    window.addEventListener('keyup', (event) => {
+        if (event.key === 'Control') {
+            isCtrlPressed = false;
+        }
+        if (event.key === 'Alt') {
+            isAltPressed = false;
+        }
+        updateModeIndicator();
+    });
+
+    window.addEventListener('blur', () => {
+        isCtrlPressed = false;
+        isAltPressed = false;
+        updateModeIndicator();
+    });
+
+    network.on('click', function(params) {
+        // --- Removal Mode ---
+        if (isCtrlPressed && isAltPressed && params.edges.length > 0) {
+            params.event.srcEvent.preventDefault();
+            const edgeId = params.edges[0];
+            edges.remove(edgeId);
+            return; // Action complete
+        }
+
+        // --- Creation Mode ---
+        if (isCtrlPressed && params.nodes.length > 0 && selectedFromNode) {
+            params.event.srcEvent.preventDefault();
+            const toNodeId = params.nodes[0];
+            const newColor = edgeColorInput.value;
+
+            // Case 1: Self-referencing edge
+            if (selectedFromNode === toNodeId) {
+                const nodeId = selectedFromNode;
+
+                const selfEdges = edges.get({
+                    filter: function(edge) {
+                        return edge.from === nodeId && edge.to === nodeId;
+                    }
+                });
+
+                const colorExists = selfEdges.some(edge => edge.color && edge.color.color === newColor);
+
+                if (!colorExists) {
+                    const loopsPerTier = 4;
+                    const tier = Math.floor(selfEdges.length / loopsPerTier);
+                    const indexInTier = selfEdges.length % loopsPerTier;
+
+                    const baseSize = 25;
+                    const sizeIncrement = 15;
+                    const newSize = baseSize + (tier * sizeIncrement);
+
+                    const angleIncrement = Math.PI / 2; // 90 degrees
+                    const newAngle = (Math.PI / 4) + (indexInTier * angleIncrement);
+
+                    saveColor(newColor);
+                    edges.add({
+                        from: nodeId,
+                        to: nodeId,
+                        color: { color: newColor, highlight: newColor },
+                        selfReference: {
+                            size: newSize,
+                            angle: newAngle
+                        }
+                    });
+                }
+            } else { // Case 2: Edge between two different nodes
+                const existingEdges = edges.get({
+                    filter: function(edge) {
+                        return (edge.from === selectedFromNode && edge.to === toNodeId);
+                    }
+                });
+
+                const colorExists = existingEdges.some(edge => edge.color && edge.color.color === newColor);
+
+                if (!colorExists) {
+                    saveColor(newColor);
+                    edges.add({
+                        from: selectedFromNode,
+                        to: toNodeId,
+                        color: { color: newColor, highlight: newColor }
+                    });
+                }
+            }
+            
+            // Prevent the selection from changing
+            setTimeout(() => network.selectNodes([selectedFromNode]), 0);
+            return; // Action complete
+        }
+    });
+
     // Optional: Select node or edge to populate input fields
     network.on("select", function (params) {
+        // When Ctrl is held, we are in connection mode, so don't change the 'from' node
+        if (isCtrlPressed) {
+            return;
+        }
+
+        if (params.nodes.length === 1) {
+            selectedFromNode = params.nodes[0]; // Keep track of the selected node
+        } else {
+            selectedFromNode = null;
+        }
+
         // Handle node selection
         if (params.nodes.length === 1) {
             var selectedNode = nodes.get(params.nodes[0]);
@@ -497,13 +632,77 @@ document.addEventListener('DOMContentLoaded', function () {
             edgeToInput.value = selectedEdge.to;
             if (selectedEdge.color && selectedEdge.color.color) {
                 edgeColorInput.value = selectedEdge.color.color;
-            } else {
-                edgeColorInput.value = "#848484"; // Default gray
             }
         } else {
             edgeFromInput.value = '';
             edgeToInput.value = '';
-            edgeColorInput.value = "#848484"; // Clear or reset color when no edge is selected
         }
+    });
+
+    // --- Project Save/Load Logic ---
+    const exportProjectBtn = document.getElementById('exportProjectBtn');
+    const importProjectInput = document.getElementById('importProjectInput');
+
+    exportProjectBtn.addEventListener('click', () => {
+        // Get all node data, including positions
+        const allNodes = nodes.get({ returnType: "Array" });
+        const positions = network.getPositions();
+        const nodesWithPositions = allNodes.map(node => {
+            if (positions[node.id]) {
+                node.x = positions[node.id].x;
+                node.y = positions[node.id].y;
+            }
+            return node;
+        });
+
+        const allEdges = edges.get({ returnType: "Array" });
+
+        const dataToExport = {
+            nodes: nodesWithPositions,
+            edges: allEdges
+        };
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "gmap-project.json");
+        document.body.appendChild(downloadAnchorNode); // Required for Firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    });
+
+    importProjectInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+
+                if (importedData && Array.isArray(importedData.nodes) && Array.isArray(importedData.edges)) {
+                    // Clear existing data
+                    nodes.clear();
+                    edges.clear();
+
+                    // Add new data
+                    nodes.add(importedData.nodes);
+                    edges.add(importedData.edges);
+
+                    // Optional: Fit the view to the new data
+                    network.fit();
+                } else {
+                    alert('Invalid project file format.');
+                }
+            } catch (error) {
+                alert('Error reading or parsing project file: ' + error.message);
+            }
+        };
+        reader.readAsText(file);
+
+        // Reset the input so the 'change' event fires again for the same file
+        importProjectInput.value = '';
     });
 });

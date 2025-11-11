@@ -250,6 +250,34 @@ body.dark-mode .menu-section textarea {
     background-color: #e0a800;
 }
 
+.menu-section button#exportProjectBtn {
+    background-color: #6f42c1; /* Purple */
+}
+
+.menu-section button#exportProjectBtn:hover {
+    background-color: #5a3d9a;
+}
+
+.import-button-label {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #17a2b8; /* Info/teal color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    box-sizing: border-box;
+    text-align: center;
+    transition: background-color 0.2s ease;
+}
+
+.import-button-label:hover {
+    background-color: #138496;
+}
+
 .menu-section label {
     display: block;
     margin-top: 10px;
@@ -268,6 +296,39 @@ body.dark-mode .menu-section textarea {
 
 .menu-section textarea {
     resize: vertical;
+}
+
+/* Mode Indicator Styles */
+#mode-indicator {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 500;
+    color: white;
+    z-index: 1010;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none; /* So it doesn't block clicks */
+}
+
+.indicator-hidden {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.indicator-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.indicator-creation-mode {
+    background-color: #007bff; /* Blue */
+}
+
+.indicator-removal-mode {
+    background-color: #dc3545; /* Red */
 }
 
 
