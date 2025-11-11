@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', function () {
     var nodes = new vis.DataSet([
-        { id: 'quark.tec.br', label: 'quark.tec.br', group: 'level3' },
-        { id: 'rh-colaborador-back.quark.tec.br', label: 'rh-colaborador-back.quark.tec.br', group: 'level3' },
-        { id: 'solis.quark.tec.br', label: 'solis.quark.tec.br', group: 'level3' },
-        { id: 'rh.quark.tec.br', label: 'rh.quark.tec.br', group: 'level3' },
-        { id: 'rh-learn.quark.tec.br', label: 'rh-learn.quark.tec.br', group: 'level3' },
-        { id: 'sign.quark.tec.br', label: 'sign.quark.tec.br', group: 'level3' },
-        { id: 'rh-ai.quark.tec.br', label: 'rh-ai.quark.tec.br', group: 'level3' },
-        { id: 'learn-backend.quark.tec.br', label: 'learn-backend.quark.tec.br', group: 'level3' },
-        { id: 'rh-colaborador.quark.tec.br', label: 'rh-colaborador.quark.tec.br', group: 'level1' }
+        { id: 'quark.tec.br', label: 'quark.tec.br', group: 'level3', title: 'Main company website' },
+        { id: 'rh-colaborador-back.quark.tec.br', label: 'rh-colaborador-back.quark.tec.br', group: 'level3', title: 'Backend for the employee portal' },
+        { id: 'solis.quark.tec.br', label: 'solis.quark.tec.br', group: 'level3', title: 'Some other system' },
+        { id: 'rh.quark.tec.br', label: 'rh.quark.tec.br', group: 'level3', title: 'Human Resources main system' },
+        { id: 'rh-learn.quark.tec.br', label: 'rh-learn.quark.tec.br', group: 'level3', title: 'E-learning platform for employees' },
+        { id: 'sign.quark.tec.br', label: 'sign.quark.tec.br', group: 'level3', title: 'Digital signature service' },
+        { id: 'rh-ai.quark.tec.br', label: 'rh-ai.quark.tec.br', group: 'level3', title: 'AI services for HR' },
+        { id: 'learn-backend.quark.tec.br', label: 'learn-backend.quark.tec.br', group: 'level3', title: 'Backend for the e-learning platform' },
+        { id: 'rh-colaborador.quark.tec.br', label: 'rh-colaborador.quark.tec.br', group: 'level1', title: 'Employee portal frontend' }
     ]);
 
     var edges = new vis.DataSet([
@@ -213,6 +213,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Node and Edge Management Logic
     const nodeNameInput = document.getElementById('nodeName');
     const newNodeNameInput = document.getElementById('newNodeName'); // New input field
+    const nodeDescriptionInput = document.getElementById('nodeDescription');
     const nodeGroupSelect = document.getElementById('nodeGroup');
     const addNodeBtn = document.getElementById('addNode');
     const updateNodeBtn = document.getElementById('updateNode');
@@ -228,6 +229,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const name = nodeNameInput.value.trim();
         const group = nodeGroupSelect.value;
         const color = nodeColorInput.value;
+        const description = nodeDescriptionInput.value.trim();
         
         if (name) {
             saveColor(color);
@@ -235,6 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 id: name,
                 label: name,
                 group: group,
+                title: description,
                 color: {
                     background: color,
                     border: darkenHexColor(color, 20), // Apply darker border always
@@ -246,6 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
             nodes.add(nodeData);
             nodeNameInput.value = '';
+            nodeDescriptionInput.value = '';
         } else {
             alert('Please enter a Node Name.');
         }
@@ -256,6 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const newName = newNodeNameInput.value.trim();
         const group = nodeGroupSelect.value;
         const color = nodeColorInput.value;
+        const description = nodeDescriptionInput.value.trim();
 
         if (!oldName) {
             alert('Please select a node or enter its current name to update.');
@@ -274,6 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const updateData = {
             id: oldName,
             group: group,
+            title: description,
             color: {
                 background: color,
                 border: darkenHexColor(color, 20), // Apply darker border always
@@ -289,6 +295,7 @@ document.addEventListener('DOMContentLoaded', function () {
             nodes.update(updateData);
             nodeNameInput.value = '';
             newNodeNameInput.value = '';
+            nodeDescriptionInput.value = '';
             newNodeNameInput.style.display = 'none';
             return;
         }
@@ -305,6 +312,7 @@ document.addEventListener('DOMContentLoaded', function () {
             id: newName,
             label: newName,
             group: group,
+            title: description,
             color: {
                 background: color,
                 border: darkenHexColor(color, 20), // Apply darker border always
@@ -352,6 +360,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         nodeNameInput.value = '';
         newNodeNameInput.value = '';
+        nodeDescriptionInput.value = '';
         newNodeNameInput.style.display = 'none'; // Hide new name field
     });
 
@@ -376,6 +385,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 nodeNameInput.value = '';
                 newNodeNameInput.value = '';
+                nodeDescriptionInput.value = '';
                 newNodeNameInput.style.display = 'none'; // Hide new name field
             }
         } else {
@@ -461,6 +471,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var selectedNode = nodes.get(params.nodes[0]);
             nodeNameInput.value = selectedNode.id; // Populate nodeName with selected node's id
             nodeGroupSelect.value = selectedNode.group;
+            nodeDescriptionInput.value = selectedNode.title || '';
             
             if (selectedNode.color) {
                 nodeColorInput.value = selectedNode.color.background || selectedNode.color;
@@ -475,6 +486,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             nodeNameInput.value = '';
             newNodeNameInput.value = '';
+            nodeDescriptionInput.value = '';
             newNodeNameInput.style.display = 'none'; // Hide new name field
         }
 

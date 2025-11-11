@@ -150,7 +150,8 @@ body.dark-mode .menu-section {
 }
 
 body.dark-mode .menu-section input[type="text"],
-body.dark-mode .menu-section select {
+body.dark-mode .menu-section select,
+body.dark-mode .menu-section textarea {
     background-color: #6c757d;
     border-color: #adb5bd;
     color: #e9ecef;
@@ -196,7 +197,8 @@ body.dark-mode .menu-section select {
 }
 
 .menu-section input[type="text"],
-.menu-section select {
+.menu-section select,
+.menu-section textarea {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -262,6 +264,10 @@ body.dark-mode .menu-section select {
     border: 1px solid #ced4da;
     border-radius: 4px;
     box-sizing: border-box;
+}
+
+.menu-section textarea {
+    resize: vertical;
 }
 
 
