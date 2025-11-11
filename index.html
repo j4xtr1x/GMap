@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMap</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="main-content">
+            <div id="graph"></div>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="menu-container">
+                <h1>GMap</h1>
+                <button id="darkModeToggle">Toggle Dark Mode</button>
+                <div class="menu-section">
+                    <h2>Node Management</h2>
+                    <input type="text" id="nodeName" placeholder="Node Name">
+                    <input type="text" id="newNodeName" placeholder="New Node Name" style="display: none;">
+                    <label for="nodeGroup">Node Size:</label>
+                    <select id="nodeGroup">
+                        <option value="Big">Big</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Small">Small</option>
+                    </select>
+                    <label for="nodeColor">Node Color:</label>
+                    <input type="color" id="nodeColor" value="#FF0000" list="savedColors">
+                    <button id="addNode">Add Node</button>
+                    <button id="updateNode">Update Node</button>
+                    <button id="removeNode">Remove Node</button>
+                </div>
+
+                <div class="menu-section">
+                    <h2>Connection Management</h2>
+                    <input type="text" id="edgeFrom" placeholder="From Node">
+                    <input type="text" id="edgeTo" placeholder="To Node">
+                    <label for="edgeColor">Connection Color:</label>
+                    <input type="color" id="edgeColor" value="#848484" list="savedColors">
+                    <button id="addEdge">Add Connection</button>
+                    <button id="updateEdge">Update Connection</button>
+                    <button id="removeEdge">Remove Connection</button>
+                </div>
+            </div>
+        </div>
+        <button id="sidebarToggle" class="sidebar-toggle-button">></button>
+    </div>
+
+    <datalist id="savedColors"></datalist>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

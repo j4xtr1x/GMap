@@ -1,0 +1,348 @@
+body {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa; /* Lighter background for normal mode */
+    color: #212529; /* Darker text for normal mode */
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+h1 {
+    font-size: 1.8em;
+    font-weight: 600;
+    margin-top: 0; /* Adjusted for sidebar placement */
+    margin-bottom: 15px; /* Consistent spacing */
+    color: #0056b3;
+    text-align: center; /* Ensure h1 is centered in sidebar */
+}
+
+h2 {
+    font-size: 1.4em;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #0056b3;
+    text-align: center;
+}
+
+/* Main Layout */
+.main-wrapper {
+    display: flex;
+    height: 100vh; /* Full viewport height */
+    position: relative;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 0; /* Graph takes full space */
+    transition: margin-right 0.3s ease; /* Smooth transition for content shift */
+    margin-right: 0; /* Default state: no margin for sidebar */
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Take full height */
+}
+
+#graph {
+    width: 100%;
+    height: 100%; /* Graph takes full height of main-content */
+    border: none; /* Remove border, as it's full screen */
+    background-color: #ffffff;
+    margin-top: 0; /* Remove margin-top */
+    border-radius: 0; /* Remove border-radius */
+    box-shadow: none; /* Remove shadow */
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 300px; /* Width of the sidebar */
+    background-color: #ffffff;
+    border-left: 1px solid #e9ecef; /* Lighter border */
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+    transform: translateX(0); /* Default state: sidebar visible */
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1); /* More pronounced shadow */
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items in sidebar */
+}
+
+.sidebar.closed {
+    transform: translateX(100%); /* Move sidebar out of view */
+}
+
+/* Adjust main content when sidebar is open */
+.main-content.sidebar-open {
+    margin-right: 300px; /* Shift main content to the left by sidebar width */
+}
+
+.sidebar-toggle-button {
+    position: fixed; /* Make it fixed relative to the viewport */
+    right: 300px; /* Position it at the left edge of the sidebar when open */
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #007bff; /* Primary brand color */
+    color: white;
+    border: none;
+    width: 40px; /* Make it square */
+    height: 40px; /* Make it square */
+    padding: 0; /* Remove padding */
+    cursor: pointer;
+    border-radius: 5px 0 0 5px; /* Rounded right edge on the button */
+    z-index: 1002; /* Ensure it's above the sidebar */
+    font-size: 1.2em;
+    line-height: 1;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: right 0.3s ease; /* Smooth transition for button movement */
+}
+
+.sidebar-toggle-button.closed {
+    right: 0; /* Move button to the far right when sidebar is closed */
+    border-radius: 5px 0 0 5px; /* Keep the same border radius */
+}
+
+
+.sidebar-toggle-button:hover {
+    background-color: #0056b3;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #212529; /* Dark background */
+    color: #e9ecef; /* Light text */
+}
+
+body.dark-mode h1 {
+    color: #90CAF9; /* Lighter blue for dark mode H1 */
+}
+
+body.dark-mode h2 {
+    color: #90CAF9;
+}
+
+body.dark-mode #graph {
+    border: none; /* Remove border in dark mode too */
+    background-color: #343a40;
+    color: #ffffff; /* This color is now handled by script.js for nodes */
+    box-shadow: none; /* Remove shadow in dark mode too */
+}
+
+body.dark-mode .sidebar {
+    background-color: #343a40;
+    border-color: #495057;
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .menu-section {
+    background-color: #495057;
+    border-color: #6c757d;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .menu-section input[type="text"],
+body.dark-mode .menu-section select {
+    background-color: #6c757d;
+    border-color: #adb5bd;
+    color: #e9ecef;
+}
+
+#darkModeToggle {
+    display: block;
+    width: 100%; /* Full width within sidebar padding */
+    margin: 15px 0; /* Adjust margin for spacing within sidebar */
+    padding: 12px 20px; /* Slightly larger padding */
+    background-color: #6c757d; /* Neutral color for toggle */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    box-sizing: border-box;
+    align-self: stretch; /* Stretch to fill sidebar width */
+}
+
+#darkModeToggle:hover {
+    background-color: #5a6268;
+}
+
+/* Menu Styles */
+.menu-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%; /* Take full width of sidebar's inner padding */
+    padding-top: 0; /* Remove padding-top */
+    margin-bottom: 0; /* Remove margin-bottom */
+}
+
+.menu-section {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Lighter shadow */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.menu-section input[type="text"],
+.menu-section select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ced4da; /* Lighter border color */
+    border-radius: 4px;
+    background-color: #fefefe; /* Very light background */
+    color: #495057;
+    box-sizing: border-box;
+}
+
+.menu-section button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em; /* Slightly smaller font for buttons */
+    box-sizing: border-box;
+    transition: background-color 0.2s ease;
+}
+
+.menu-section button:hover {
+    background-color: #218838;
+}
+
+
+
+.menu-section button#removeNode,
+.menu-section button#removeEdge {
+    background-color: #dc3545;
+}
+
+.menu-section button#removeNode:hover,
+.menu-section button#removeEdge:hover {
+    background-color: #c82333;
+}
+
+.menu-section button#updateNode,
+.menu-section button#updateEdge { /* Apply same style to updateEdge */
+    background-color: #ffc107;
+    color: #212529; /* Dark text on yellow button */
+}
+
+.menu-section button#updateNode:hover,
+.menu-section button#updateEdge:hover { /* Apply same hover style */
+    background-color: #e0a800;
+}
+
+.menu-section label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.menu-section input[type="color"] {
+    width: 100%;
+    height: 40px;
+    padding: 5px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+
+
+
+@media (max-width: 768px) {
+    .main-wrapper {
+        flex-direction: column;
+    }
+
+    .main-content {
+        height: 100%; /* Full height on mobile */
+        padding-bottom: 0; /* Remove bottom padding */
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto; /* Height adapts to content */
+        position: fixed;
+        bottom: 0; /* Position at the bottom */
+        top: unset; /* Remove top positioning */
+        transform: translateY(100%); /* Hide sidebar below viewport */
+        box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+        border-left: none;
+        border-top: 1px solid #e9ecef; /* Border on top */
+        flex-direction: column; /* Stack items vertically */
+        justify-content: flex-start;
+        align-items: center;
+        padding: 10px 20px;
+    }
+
+    .sidebar.closed {
+        transform: translateY(100%); /* Keep hidden */
+    }
+
+    .sidebar.open {
+        transform: translateY(0); /* Show full sidebar */
+        height: 80%; /* Take up 80% of the screen height */
+    }
+
+    .sidebar-toggle-button {
+        position: fixed; /* Keep fixed */
+        right: 0; /* Always visible on the far right */
+        top: 50%;
+        transform: translateY(-50%);
+        left: unset;
+        border-radius: 5px 0 0 5px; /* Adjust border radius for right edge */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 1002; /* Ensure it's above everything */
+    }
+
+    .main-content.sidebar-open {
+        margin-right: 0; /* No margin shift on mobile */
+    }
+
+    #graph {
+        margin-top: 0;
+        height: 100%;
+    }
+
+    .menu-container {
+        display: flex; /* Always display on mobile if sidebar is open */
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        padding-top: 10px;
+    }
+
+
+    .menu-section {
+        width: 100%; /* Full width on mobile */
+    }
+
+    .menu-section button {
+        width: calc(50% - 5px); /* Two buttons per row */
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-section button {
+        width: 100%; /* Single column on small mobile screens */
+        margin-left: 0 !important;
+    }
+}
