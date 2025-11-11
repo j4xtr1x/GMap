@@ -1,26 +1,47 @@
 document.addEventListener('DOMContentLoaded', function () {
-    var nodes = new vis.DataSet([
-        { id: 'quark.tec.br', label: 'quark.tec.br', group: 'level3', title: 'Main company website' },
-        { id: 'rh-colaborador-back.quark.tec.br', label: 'rh-colaborador-back.quark.tec.br', group: 'level3', title: 'Backend for the employee portal' },
-        { id: 'solis.quark.tec.br', label: 'solis.quark.tec.br', group: 'level3', title: 'Some other system' },
-        { id: 'rh.quark.tec.br', label: 'rh.quark.tec.br', group: 'level3', title: 'Human Resources main system' },
-        { id: 'rh-learn.quark.tec.br', label: 'rh-learn.quark.tec.br', group: 'level3', title: 'E-learning platform for employees' },
-        { id: 'sign.quark.tec.br', label: 'sign.quark.tec.br', group: 'level3', title: 'Digital signature service' },
-        { id: 'rh-ai.quark.tec.br', label: 'rh-ai.quark.tec.br', group: 'level3', title: 'AI services for HR' },
-        { id: 'learn-backend.quark.tec.br', label: 'learn-backend.quark.tec.br', group: 'level3', title: 'Backend for the e-learning platform' },
-        { id: 'rh-colaborador.quark.tec.br', label: 'rh-colaborador.quark.tec.br', group: 'level1', title: 'Employee portal frontend' }
-    ]);
+    var nodes = new vis.DataSet();
+    var edges = new vis.DataSet();
 
-    var edges = new vis.DataSet([
-        { from: 'rh-colaborador.quark.tec.br', to: 'quark.tec.br' },
-        { from: 'rh-colaborador.quark.tec.br', to: 'rh-colaborador-back.quark.tec.br' },
-        { from: 'rh-colaborador.quark.tec.br', to: 'solis.quark.tec.br' },
-        { from: 'rh-colaborador.quark.tec.br', to: 'rh.quark.tec.br' },
-        { from: 'rh-colaborador.quark.tec.br', to: 'rh-learn.quark.tec.br' },
-        { from: 'rh-colaborador.quark.tec.br', to: 'sign.quark.tec.br' },
-        { from: 'rh-colaborador.quark.tec.br', to: 'rh-ai.quark.tec.br' },
-        { from: 'rh-colaborador.quark.tec.br', to: 'learn-backend.quark.tec.br' }
-    ]);
+    function loadStateFromLocalStorage() {
+        const savedStateJSON = localStorage.getItem('gmap-autosave');
+        if (savedStateJSON) {
+            try {
+                const savedState = JSON.parse(savedStateJSON);
+                if (savedState && Array.isArray(savedState.nodes) && Array.isArray(savedState.edges)) {
+                    nodes.add(savedState.nodes);
+                    edges.add(savedState.edges);
+                    return; // Exit after successful load
+                }
+            } catch (e) {
+                console.error("Failed to parse auto-saved state, loading default data.", e);
+            }
+        }
+
+        // If no saved state or parsing fails, load default data
+        nodes.add([
+            { id: 'quark.tec.br', label: 'quark.tec.br', group: 'level3', title: 'Main company website' },
+            { id: 'rh-colaborador-back.quark.tec.br', label: 'rh-colaborador-back.quark.tec.br', group: 'level3', title: 'Backend for the employee portal' },
+            { id: 'solis.quark.tec.br', label: 'solis.quark.tec.br', group: 'level3', title: 'Some other system' },
+            { id: 'rh.quark.tec.br', label: 'rh.quark.tec.br', group: 'level3', title: 'Human Resources main system' },
+            { id: 'rh-learn.quark.tec.br', label: 'rh-learn.quark.tec.br', group: 'level3', title: 'E-learning platform for employees' },
+            { id: 'sign.quark.tec.br', label: 'sign.quark.tec.br', group: 'level3', title: 'Digital signature service' },
+            { id: 'rh-ai.quark.tec.br', label: 'rh-ai.quark.tec.br', group: 'level3', title: 'AI services for HR' },
+            { id: 'learn-backend.quark.tec.br', label: 'learn-backend.quark.tec.br', group: 'level3', title: 'Backend for the e-learning platform' },
+            { id: 'rh-colaborador.quark.tec.br', label: 'rh-colaborador.quark.tec.br', group: 'level1', title: 'Employee portal frontend' }
+        ]);
+        edges.add([
+            { from: 'rh-colaborador.quark.tec.br', to: 'quark.tec.br' },
+            { from: 'rh-colaborador.quark.tec.br', to: 'rh-colaborador-back.quark.tec.br' },
+            { from: 'rh-colaborador.quark.tec.br', to: 'solis.quark.tec.br' },
+            { from: 'rh-colaborador.quark.tec.br', to: 'rh.quark.tec.br' },
+            { from: 'rh-colaborador.quark.tec.br', to: 'rh-learn.quark.tec.br' },
+            { from: 'rh-colaborador.quark.tec.br', to: 'sign.quark.tec.br' },
+            { from: 'rh-colaborador.quark.tec.br', to: 'rh-ai.quark.tec.br' },
+            { from: 'rh-colaborador.quark.tec.br', to: 'learn-backend.quark.tec.br' }
+        ]);
+    }
+
+    loadStateFromLocalStorage();
 
     var container = document.getElementById('graph');
     var data = {
@@ -108,6 +129,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var network = new vis.Network(container, data, options);
 
+    // --- Auto-save Logic ---
+    function saveStateToLocalStorage() {
+        try {
+            const allNodes = nodes.get({ returnType: "Array" });
+            const positions = network.getPositions();
+            const nodesWithPositions = allNodes.map(node => {
+                if (positions[node.id]) {
+                    node.x = positions[node.id].x;
+                    node.y = positions[node.id].y;
+                }
+                return node;
+            });
+
+            const allEdges = edges.get({ returnType: "Array" });
+
+            const dataToSave = {
+                nodes: nodesWithPositions,
+                edges: allEdges
+            };
+
+            localStorage.setItem('gmap-autosave', JSON.stringify(dataToSave));
+        } catch (error) {
+            console.error("Auto-save failed:", error);
+        }
+    }
+
+    nodes.on('*', () => saveStateToLocalStorage());
+    edges.on('*', () => saveStateToLocalStorage());
+    network.on('dragEnd', (params) => {
+        if (params.nodes && params.nodes.length > 0) {
+            saveStateToLocalStorage();
+        }
+    });
 
 
     // --- Color Management ---
@@ -219,11 +273,35 @@ document.addEventListener('DOMContentLoaded', function () {
     const updateNodeBtn = document.getElementById('updateNode');
     const removeNodeBtn = document.getElementById('removeNode');
 
-    const edgeFromInput = document.getElementById('edgeFrom');
-    const edgeToInput = document.getElementById('edgeTo');
-    const addEdgeBtn = document.getElementById('addEdge');
-    const updateEdgeBtn = document.getElementById('updateEdge'); // New button
-    const removeEdgeBtn = document.getElementById('removeEdge');
+    function removeNodeAndEdges(nodeId) {
+        const nodeToRemove = nodes.get(nodeId);
+        if (!nodeToRemove) return;
+
+        const message = `Are you sure you want to remove the node "${nodeId}"? All connections to this node will also be removed.`;
+        if (confirm(message)) {
+            // Find and remove all connected edges
+            const connectedEdges = edges.get({
+                filter: function(edge) {
+                    return edge.from === nodeId || edge.to === nodeId;
+                }
+            });
+            const edgesToRemove = connectedEdges.map(edge => edge.id);
+            if (edgesToRemove.length > 0) {
+                edges.remove(edgesToRemove);
+            }
+
+            // Now remove the node
+            nodes.remove({ id: nodeId });
+
+            // Clear input fields if the deleted node was displayed
+            if (nodeNameInput.value === nodeId) {
+                nodeNameInput.value = '';
+                newNodeNameInput.value = '';
+                nodeDescriptionInput.value = '';
+                newNodeNameInput.style.display = 'none';
+            }
+        }
+    }
 
     addNodeBtn.addEventListener('click', () => {
         const name = nodeNameInput.value.trim();
@@ -366,32 +444,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     removeNodeBtn.addEventListener('click', () => {
         const name = nodeNameInput.value.trim();
-        if (name && nodes.get(name)) {
-            const message = `Are you sure you want to remove the node "${name}"? All connections to this node will also be removed.`;
-            if (confirm(message)) {
-                // Find and remove all connected edges
-                const connectedEdges = edges.get({
-                    filter: function(edge) {
-                        return edge.from === name || edge.to === name;
-                    }
-                });
-                const edgesToRemove = connectedEdges.map(edge => edge.id);
-                if (edgesToRemove.length > 0) {
-                    edges.remove(edgesToRemove);
-                }
-
-                // Now remove the node
-                nodes.remove({ id: name });
-
-                nodeNameInput.value = '';
-                newNodeNameInput.value = '';
-                nodeDescriptionInput.value = '';
-                newNodeNameInput.style.display = 'none'; // Hide new name field
-            }
+        if (name) {
+            removeNodeAndEdges(name);
         } else {
-            alert('Please enter a valid Node Name to remove.');
+            alert('Please select a node to remove.');
         }
     });
+
+    const edgeFromInput = document.getElementById('edgeFrom');
+    const edgeToInput = document.getElementById('edgeTo');
+    const addEdgeBtn = document.getElementById('addEdge');
+    const updateEdgeBtn = document.getElementById('updateEdge'); // New button
+    const removeEdgeBtn = document.getElementById('removeEdge');
 
     addEdgeBtn.addEventListener('click', () => {
         const from = edgeFromInput.value.trim();
@@ -464,6 +528,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // --- Keyboard and Click Shortcuts ---
     let isCtrlPressed = false;
     let isAltPressed = false;
     let selectedFromNode = null;
@@ -491,9 +556,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         updateModeIndicator();
 
-        // Ignore other keys if typing in an input.
+        // Guard for input fields
         if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
             return;
+        }
+
+        // Delete selected node or edge
+        if (event.key === 'Delete') {
+            const selection = network.getSelection();
+            if (selection.nodes.length > 0) {
+                removeNodeAndEdges(selection.nodes[0]);
+            } else if (selection.edges.length > 0) {
+                edges.remove(selection.edges[0]);
+            }
         }
     });
 
@@ -515,11 +590,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     network.on('click', function(params) {
         // --- Removal Mode ---
-        if (isCtrlPressed && isAltPressed && params.edges.length > 0) {
+        if (isCtrlPressed && isAltPressed) {
             params.event.srcEvent.preventDefault();
-            const edgeId = params.edges[0];
-            edges.remove(edgeId);
-            return; // Action complete
+
+            // If an edge was clicked, remove it.
+            if (params.edges.length > 0) {
+                const edgeId = params.edges[0];
+                edges.remove(edgeId);
+                return; // Action complete
+            }
+
+            // If a node was clicked, remove it using the existing function.
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                removeNodeAndEdges(nodeId);
+                return; // Action complete
+            }
         }
 
         // --- Creation Mode ---
