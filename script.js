@@ -129,6 +129,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var network = new vis.Network(container, data, options);
 
+    // --- Tab Logic ---
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Deactivate all buttons and content
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Activate clicked button and corresponding content
+            button.classList.add('active');
+            const targetTabId = button.dataset.tab;
+            document.getElementById(targetTabId).classList.add('active');
+        });
+    });
+
     // --- Auto-save Logic ---
     function saveStateToLocalStorage() {
         try {
@@ -725,70 +742,27 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // --- Project Save/Load Logic ---
-    const exportProjectBtn = document.getElementById('exportProjectBtn');
-    const importProjectInput = document.getElementById('importProjectInput');
+    // Node Search Logic
+    const nodeSearchInput = document.getElementById('nodeSearchInput');
 
-    exportProjectBtn.addEventListener('click', () => {
-        // Get all node data, including positions
-        const allNodes = nodes.get({ returnType: "Array" });
-        const positions = network.getPositions();
-        const nodesWithPositions = allNodes.map(node => {
-            if (positions[node.id]) {
-                node.x = positions[node.id].x;
-                node.y = positions[node.id].y;
-            }
-            return node;
-        });
-
-        const allEdges = edges.get({ returnType: "Array" });
-
-        const dataToExport = {
-            nodes: nodesWithPositions,
-            edges: allEdges
-        };
-
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "gmap-project.json");
-        document.body.appendChild(downloadAnchorNode); // Required for Firefox
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-    });
-
-    importProjectInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (!file) {
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const importedData = JSON.parse(e.target.result);
-
-                if (importedData && Array.isArray(importedData.nodes) && Array.isArray(importedData.edges)) {
-                    // Clear existing data
-                    nodes.clear();
-                    edges.clear();
-
-                    // Add new data
-                    nodes.add(importedData.nodes);
-                    edges.add(importedData.edges);
-
-                    // Optional: Fit the view to the new data
-                    network.fit();
+    nodeSearchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            const searchTerm = nodeSearchInput.value.trim();
+            if (searchTerm) {
+                const foundNode = nodes.get(searchTerm);
+                if (foundNode) {
+                    network.focus(searchTerm, {
+                        scale: 1.0,
+                        animation: {
+                            duration: 1000,
+                            easingFunction: 'easeInOutQuad'
+                        }
+                    });
+                    nodeSearchInput.value = ''; // Clear input after search
                 } else {
-                    alert('Invalid project file format.');
+                    alert(`Node "${searchTerm}" not found.`);
                 }
-            } catch (error) {
-                alert('Error reading or parsing project file: ' + error.message);
             }
-        };
-        reader.readAsText(file);
-
-        // Reset the input so the 'change' event fires again for the same file
-        importProjectInput.value = '';
+        }
     });
 });
