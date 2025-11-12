@@ -17,28 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // If no saved state or parsing fails, load default data
-        nodes.add([
-            { id: 'quark.tec.br', label: 'quark.tec.br', group: 'level3', title: 'Main company website' },
-            { id: 'rh-colaborador-back.quark.tec.br', label: 'rh-colaborador-back.quark.tec.br', group: 'level3', title: 'Backend for the employee portal' },
-            { id: 'solis.quark.tec.br', label: 'solis.quark.tec.br', group: 'level3', title: 'Some other system' },
-            { id: 'rh.quark.tec.br', label: 'rh.quark.tec.br', group: 'level3', title: 'Human Resources main system' },
-            { id: 'rh-learn.quark.tec.br', label: 'rh-learn.quark.tec.br', group: 'level3', title: 'E-learning platform for employees' },
-            { id: 'sign.quark.tec.br', label: 'sign.quark.tec.br', group: 'level3', title: 'Digital signature service' },
-            { id: 'rh-ai.quark.tec.br', label: 'rh-ai.quark.tec.br', group: 'level3', title: 'AI services for HR' },
-            { id: 'learn-backend.quark.tec.br', label: 'learn-backend.quark.tec.br', group: 'level3', title: 'Backend for the e-learning platform' },
-            { id: 'rh-colaborador.quark.tec.br', label: 'rh-colaborador.quark.tec.br', group: 'level1', title: 'Employee portal frontend' }
-        ]);
-        edges.add([
-            { from: 'rh-colaborador.quark.tec.br', to: 'quark.tec.br' },
-            { from: 'rh-colaborador.quark.tec.br', to: 'rh-colaborador-back.quark.tec.br' },
-            { from: 'rh-colaborador.quark.tec.br', to: 'solis.quark.tec.br' },
-            { from: 'rh-colaborador.quark.tec.br', to: 'rh.quark.tec.br' },
-            { from: 'rh-colaborador.quark.tec.br', to: 'rh-learn.quark.tec.br' },
-            { from: 'rh-colaborador.quark.tec.br', to: 'sign.quark.tec.br' },
-            { from: 'rh-colaborador.quark.tec.br', to: 'rh-ai.quark.tec.br' },
-            { from: 'rh-colaborador.quark.tec.br', to: 'learn-backend.quark.tec.br' }
-        ]);
+        // If no saved state or parsing fails, the graph will start empty.
     }
 
     loadStateFromLocalStorage();
@@ -650,10 +629,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const baseSize = 25;
                     const sizeIncrement = 15;
-                    const newSize = baseSize + (tier * sizeIncrement);
-
-                    const angleIncrement = Math.PI / 2; // 90 degrees
-                    const newAngle = (Math.PI / 4) + (indexInTier * angleIncrement);
+                    const newAngle = (Math.PI / 4) + (indexInTier * (Math.PI / 2)); // 90 degrees increment
 
                     saveColor(newColor);
                     edges.add({
@@ -661,7 +637,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         to: nodeId,
                         color: { color: newColor, highlight: newColor },
                         selfReference: {
-                            size: newSize,
+                            size: baseSize + (tier * sizeIncrement),
                             angle: newAngle
                         }
                     });
@@ -763,6 +739,36 @@ document.addEventListener('DOMContentLoaded', function () {
                     alert(`Node "${searchTerm}" not found.`);
                 }
             }
+        }
+    });
+
+    // --- Instructions Modal Logic ---
+    const instructionsModal = document.getElementById('instructionsModal');
+    const closeButton = instructionsModal.querySelector('.close-button');
+    const showInstructionsBtn = document.getElementById('showInstructionsBtn');
+
+    function showInstructions() {
+        instructionsModal.style.display = 'flex'; // Use flex to center content
+    }
+
+    function hideInstructions() {
+        instructionsModal.style.display = 'none';
+    }
+
+    // Show instructions on first visit
+    if (!localStorage.getItem('gmap-instructions-shown')) {
+        showInstructions();
+        localStorage.setItem('gmap-instructions-shown', 'true');
+    }
+
+    // Event listeners for the modal
+    closeButton.addEventListener('click', hideInstructions);
+    showInstructionsBtn.addEventListener('click', showInstructions);
+
+    // Close modal if user clicks outside of it
+    window.addEventListener('click', (event) => {
+        if (event.target === instructionsModal) {
+            hideInstructions();
         }
     });
 });

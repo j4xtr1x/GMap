@@ -70,6 +70,7 @@
                 <div id="settings-management" class="tab-content active">
                     <div class="menu-section">
                         <button id="darkModeToggle">Toggle Dark Mode</button>
+                        <button id="showInstructionsBtn">Show Instructions</button>
                     </div>
                 </div>
             </div>
@@ -78,6 +79,44 @@
     </div>
 
     <div id="mode-indicator" class="indicator-hidden"></div>
+
+    <!-- Instructions Modal -->
+    <div id="instructionsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>GMap Instructions</h2>
+            <ul>
+                <li><strong>Node Management:</strong>
+                    <ul>
+                        <li><strong>Add Node:</strong> Go to the "Node" tab, enter a name, description, size, and color, then click "Add Node".</li>
+                        <li><strong>Update Node:</strong> Select a node on the graph, modify its properties in the "Node" tab, and click "Update Node". You can also rename a node here.</li>
+                        <li><strong>Remove Node:</strong> Select a node and click "Remove Node" in the "Node" tab.</li>
+                    </ul>
+                </li>
+                <li><strong>Connection Management:</strong>
+                    <ul>
+                        <li><strong>Add Connection:</strong> Go to the "Connection" tab, enter "From Node" and "To Node" IDs, select a color, and click "Add Connection".</li>
+                        <li><strong>Quick Connect:</strong> Hold <code>Ctrl</code>, click the "From" node, then click the "To" node.</li>
+                        <li><strong>Remove Connection:</strong> Enter "From Node" and "To Node" IDs in the "Connection" tab and click "Remove Connection".</li>
+                    </ul>
+                </li>
+                <li><strong>General Actions:</strong>
+                    <ul>
+                        <li><strong>Delete Selected (Keyboard):</strong> Select a node or connection and press the <code>Delete</code> key to remove it.</li>
+                        <li><strong>Quick Remove (Mouse):</strong> Hold <code>Ctrl + Alt</code> and click on a node or connection to remove it directly.</li>
+                        <li><strong>Search Node:</strong> Use the search bar at the top-left to find and focus on a specific node.</li>
+                    </ul>
+                </li>
+                <li><strong>Settings & Project:</strong>
+                    <ul>
+                        <li><strong>Dark Mode:</strong> Toggle dark mode in the "Settings" tab.</li>
+                        <li><strong>Export/Import Project:</strong> Use the "Project" tab to save or load your graph data.</li>
+                        <li><strong>Sidebar Toggle:</strong> Use the `>` or `<` button to hide/show the sidebar.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
 
     <datalist id="savedColors"></datalist>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
